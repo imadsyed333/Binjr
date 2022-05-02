@@ -1,22 +1,32 @@
 package com.example.binjr;
 
-import android.graphics.drawable.Drawable;
+import android.content.Context;
 import android.util.Log;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Movie {
 
     String title;
     String id;
     String posterUrl;
+    Context context;
+    RequestQueue requestQueue;
 
-    public Movie (String title, String id, String posterUrl) {
+    public Movie (String title, String id, Context context) {
         this.title = title;
         this.id = id;
-        this.posterUrl = posterUrl;
+        this.context = context;
+        requestQueue = Volley.newRequestQueue(this.context);
+        setPosterUrl();
     }
 
     public String getTitle() {
@@ -27,17 +37,28 @@ public class Movie {
         return this.id;
     }
 
-    public String getPosterUrl() {
-        return this.posterUrl;
+    public void setPosterUrl() {
+        String url = "https://imdb-api.com/en/API/Title/k_pv6qgh82/" + getId();
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    posterUrl = response.getString("image");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.d("Error", "poster badness");
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Error", "Request failed");
+            }
+        });
+        requestQueue.add(jsonObjectRequest);
     }
 
-    public Drawable getPoster() {
-        try {
-            InputStream inputStream = (InputStream) new URL(this.posterUrl).getContent();
-            return Drawable.createFromStream(inputStream, "posterImage");
-        } catch (IOException e) {
-            Log.d("Error", "Image could not be extracted");
-            return null;
-        }
+    public String getPosterUrl() {
+        return this.posterUrl;
     }
 }
