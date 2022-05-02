@@ -58,9 +58,7 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject movieObject = (JSONObject) movieObjects.get(i);
                         String id = movieObject.getString("id");
                         String title = movieObject.getString("title");
-                        String posterUrl = movieObject.getString("image");
-                        Movie movie = new Movie(title, id, posterUrl);
-                        System.out.println(title);
+                        Movie movie = new Movie(title, id, getApplicationContext());
                         movies.add(movie);
                         adapter.notifyItemInserted(i);
                     }
